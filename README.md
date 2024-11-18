@@ -90,8 +90,313 @@ CNN memiliki berbagai keunggulan yang menjadikannya pilihan utama dalam berbagai
 
 #### **Kesimpulan:**
 
-Convolutional Neural Networks (CNN) adalah arsitektur jaringan saraf dalam deep learning yang sangat efisien dan efektif dalam memproses data spasial seperti gambar. Dengan memanfaatkan lapisan-lapisan penting seperti **Convolutional Layer**, **Pooling Layer**, **Flattening**, dan **Fully Connected Layer**, CNN mampu mengekstraksi fitur yang relevan dan membuat prediksi yang akurat. Keunggulan CNN terlet
-
-ak pada kemampuannya untuk secara otomatis belajar fitur-fitur dari data, yang membuatnya sangat berguna dalam aplikasi seperti pengenalan objek, klasifikasi gambar, dan deteksi wajah.
+Convolutional Neural Networks (CNN) adalah arsitektur jaringan saraf dalam deep learning yang sangat efisien dan efektif dalam memproses data spasial seperti gambar. Dengan memanfaatkan lapisan-lapisan penting seperti **Convolutional Layer**, **Pooling Layer**, **Flattening**, dan **Fully Connected Layer**, CNN mampu mengekstraksi fitur yang relevan dan membuat prediksi yang akurat. Keunggulan CNN terletak pada kemampuannya untuk secara otomatis belajar fitur-fitur dari data, yang membuatnya sangat berguna dalam aplikasi seperti pengenalan objek, klasifikasi gambar, dan deteksi wajah.
 
 Dengan kemampuan untuk menangani data dalam jumlah besar dan menghasilkan hasil yang sangat baik, CNN telah menjadi dasar bagi banyak teknologi canggih dalam pengolahan gambar dan visi komputer, serta menjadi pilar utama dalam perkembangan kecerdasan buatan modern.
+
+# Link 2: https://www.megabagus.id/deep-learning-convolutional-neural-networks-aplikasi/
+### **Deep Learning: Convolutional Neural Networks (aplikasi)**
+
+Artikel ini membahas aplikasi Convolutional Neural Networks (CNN) dalam melakukan klasifikasi gambar dengan Python, khususnya untuk membedakan antara gambar kucing (*cats*) dan anjing (*dogs*). Sebelum praktik, pembaca disarankan memahami dasar-dasar Python, konsep dasar deep learning, dan teori CNN melalui artikel terkait. Untuk menjalankan proyek, pembaca perlu mengunduh dataset besar (200-300 MB) yang disediakan melalui Google Drive.
+
+### 1. **Dataset dan Struktur Data**  
+Dataset terdiri dari 10.000 gambar:  
+- **Training set**: 8.000 gambar (4.000 kucing, 4.000 anjing).  
+- **Test set**: 2.000 gambar (1.000 kucing, 1.000 anjing).  
+
+Dataset dibagi ke dalam dua folder utama (`training_set` dan `test_set`), masing-masing berisi subfolder `cats` dan `dogs`. File gambar diberi nama urut (*e.g.*, `cat1.jpg`, `dog1.jpg`) agar algoritma dapat mengenali kategori gambar berdasarkan nama file. Variabel independen adalah piksel gambar, sedangkan variabel dependen adalah kategori (kucing/anjing).
+
+### 2. **Langkah Implementasi CNN dengan Python**  
+Berikut adalah penjelasan untuk masing-masing bagian kode yang diberikan:
+
+ 
+
+## **Kode 1: Melatih Model CNN untuk Klasifikasi Gambar**
+
+### **1. Mengimpor Library**
+```python
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+```
+- **`Sequential`**: Membuat model CNN secara bertahap.
+- **`Conv2D`, `MaxPooling2D`, `Flatten`, `Dense`**: Layer-layer untuk membangun arsitektur CNN.
+- **`ImageDataGenerator`**: Digunakan untuk augmentasi data gambar dan normalisasi.
+
+ 
+
+### **2. Membangun Arsitektur CNN**
+```python
+MesinKlasifikasi = Sequential()
+MesinKlasifikasi.add(Conv2D(filters=32, kernel_size=(3, 3), input_shape=(128, 128, 3), activation='relu'))
+MesinKlasifikasi.add(MaxPooling2D(pool_size=(2, 2)))
+```
+- **`Conv2D`**: Layer konvolusi dengan 32 filter dan ukuran kernel \(3 \times 3\). Fungsi aktivasi ReLU digunakan untuk menambahkan non-linearitas.
+- **`input_shape=(128, 128, 3)`**: Model mengharapkan input gambar berukuran \(128 \times 128\) dengan 3 channel (RGB).
+- **`MaxPooling2D`**: Layer pooling dengan ukuran \(2 \times 2\), digunakan untuk mengurangi ukuran gambar tanpa kehilangan fitur penting.
+
+```python
+MesinKlasifikasi.add(Conv2D(32, (3, 3), activation='relu'))
+MesinKlasifikasi.add(MaxPooling2D(pool_size=(2, 2)))
+```
+- Menambahkan layer konvolusi dan pooling tambahan untuk meningkatkan kemampuan ekstraksi fitur.
+
+```python
+MesinKlasifikasi.add(Flatten())
+```
+- **`Flatten`**: Mengubah output matriks 2D dari layer sebelumnya menjadi vektor 1D.
+
+```python
+MesinKlasifikasi.add(Dense(units=128, activation='relu'))
+MesinKlasifikasi.add(Dense(units=1, activation='sigmoid'))
+```
+- **Dense Layer**: 
+  - Layer pertama memiliki 128 neuron dengan fungsi aktivasi ReLU.
+  - Layer kedua memiliki 1 neuron dengan fungsi aktivasi **sigmoid**, karena tugas klasifikasi adalah **biner** (anjing/kucing).
+
+ 
+
+### **3. Kompilasi Model**
+```python
+MesinKlasifikasi.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+```
+- **`adam`**: Optimizer untuk mempercepat pelatihan.
+- **`binary_crossentropy`**: Fungsi loss yang cocok untuk klasifikasi biner.
+- **`accuracy`**: Metrik evaluasi model.
+
+ 
+
+### **4. Augmentasi Data dan Normalisasi**
+```python
+train_datagen = ImageDataGenerator(rescale=1./255,
+                                   shear_range=0.2,
+                                   zoom_range=0.2,
+                                   horizontal_flip=True)
+
+test_datagen = ImageDataGenerator(rescale=1./255)
+```
+- **Rescaling**: Mengubah nilai piksel gambar menjadi antara 0 dan 1.
+- **Augmentasi Data**: Data pelatihan diperbesar secara virtual dengan transformasi seperti rotasi, zoom, dan flipping.
+
+```python
+training_set = train_datagen.flow_from_directory('dataset/training_set',
+                                                 target_size=(128, 128),
+                                                 batch_size=32,
+                                                 class_mode='binary')
+
+test_set = test_datagen.flow_from_directory('dataset/test_set',
+                                            target_size=(128, 128),
+                                            batch_size=32,
+                                            class_mode='binary')
+```
+- **`flow_from_directory`**: Memuat gambar dari folder.
+- **`target_size=(128, 128)`**: Mengubah ukuran semua gambar menjadi \(128 \times 128\).
+- **`class_mode='binary'`**: Tugas klasifikasi biner (anjing/kucing).
+
+ 
+
+### **5. Melatih Model**
+```python
+MesinKlasifikasi.fit(
+    training_set,
+    steps_per_epoch=8000 // 32,
+    epochs=50,
+    validation_data=test_set,
+    validation_steps=2000 // 32
+)
+```
+- **`steps_per_epoch`**: Jumlah batch yang diproses dalam satu epoch. Dataset pelatihan memiliki 8.000 gambar.
+- **`epochs=50`**: Model dilatih selama 50 epoch.
+- **`validation_data`**: Data pengujian digunakan untuk mengevaluasi model di setiap epoch.
+
+ 
+
+## **Kode 2: Menggunakan Model untuk Prediksi**
+
+### **1. Memuat Gambar Individu**
+```python
+import numpy as np
+from keras.preprocessing import image
+```
+- **`image`**: Digunakan untuk memuat dan memproses gambar untuk inferensi.
+
+ 
+
+### **2. Membuat Prediksi**
+```python
+for i in range(4001, 5001): 
+    test_image = image.load_img('dataset/test_set/dogs/dog.' + str(i) + '.jpg', target_size = (128, 128))
+    test_image = image.img_to_array(test_image)
+    test_image = np.expand_dims(test_image, axis = 0)
+    result = MesinKlasifikasi.predict(test_image)
+```
+- **Memuat gambar**:
+  - Gambar dari folder `dogs` dengan nama file berformat `dog.4001.jpg`, dst.
+  - **`target_size=(128, 128)`**: Mengubah ukuran gambar agar sesuai dengan input model.
+- **Konversi ke array**: Gambar diubah menjadi array menggunakan `img_to_array`.
+- **Menambahkan dimensi batch**: Gambar dimasukkan dalam batch menggunakan `expand_dims`.
+- **Prediksi**: Model memberikan probabilitas untuk kelas **dog** (1) atau **cat** (0).
+
+ 
+
+### **3. Menentukan Kelas**
+```python
+    if result[0][0] == 0:
+        prediction = 'cat'
+        count_cat = count_cat + 1
+    else:
+        prediction = 'dog'
+        count_dog = count_dog + 1
+```
+- Jika **probabilitas** hasil prediksi adalah 0, kelasnya adalah **cat**; jika 1, kelasnya adalah **dog**.
+- Variabel `count_cat` dan `count_dog` digunakan untuk menghitung jumlah prediksi untuk setiap kelas.
+
+ 
+
+### **4. Menampilkan Hasil**
+```python
+print("count_dog:" + str(count_dog))    
+print("count_cat:" + str(count_cat))
+```
+- Menampilkan jumlah prediksi untuk masing-masing kelas (dog/cat).
+
+ 
+
+## **Kesimpulan**
+- **Kode 1** melatih model CNN untuk klasifikasi gambar biner (anjing/kucing) menggunakan augmentasi data.
+- **Kode 2** menggunakan model terlatih untuk memprediksi gambar individu dari folder pengujian. Hasilnya dihitung dan dirangkum dalam bentuk jumlah prediksi untuk masing-masing kelas.
+
+# Link 3: https://modul-praktikum-ai.vercel.app/Materi/4-convolutional-neural-network
+Berikut adalah penjelasan masing-masing bagian dari kode pada link tersebut:
+
+### **1. Memuat dan Menyiapkan Data CIFAR-10**
+```python
+import tensorflow as tf
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.utils import to_categorical
+ 
+# Memuat data CIFAR-10
+(train_images, train_labels), (test_images, test_labels) = cifar10.load_data()
+```
+- **`cifar10.load_data()`**: Memuat dataset CIFAR-10, yang terdiri dari 60.000 gambar berukuran 32x32 dalam 10 kelas. Dataset ini dibagi menjadi **50.000 data pelatihan** dan **10.000 data pengujian**.
+
+```python
+# Normalisasi data gambar
+train_images = train_images.astype('float32') / 255.0
+test_images = test_images.astype('float32') / 255.0
+```
+- **Normalisasi**: Data gambar diubah menjadi nilai antara 0 hingga 1 dengan membagi setiap piksel dengan 255.0. Ini mempercepat konvergensi model selama pelatihan.
+
+```python
+# Mengonversi label ke bentuk kategorikal
+train_labels = to_categorical(train_labels, 10)
+test_labels = to_categorical(test_labels, 10)
+```
+- **Label Kategorikal**: Label angka (0–9) diubah menjadi bentuk **one-hot encoding** untuk digunakan dalam klasifikasi multi-kelas.
+
+ 
+
+### **2. Membangun Model CNN**
+```python
+model = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+```
+- **`Conv2D`**: Layer konvolusi dengan 32 filter, ukuran kernel \(3 \times 3\), dan fungsi aktivasi ReLU. Layer ini bertugas mengekstraksi fitur dari gambar.
+- **`MaxPooling2D`**: Layer pooling dengan ukuran kernel \(2 \times 2\) untuk mengurangi ukuran gambar dan meminimalkan kompleksitas.
+
+```python
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+```
+- Menambahkan layer konvolusi kedua dengan 64 filter dan pooling untuk memperdalam jaringan.
+
+```python
+    tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+```
+- Menambahkan layer konvolusi ketiga dengan 128 filter untuk menangkap lebih banyak fitur kompleks.
+
+```python
+    tf.keras.layers.Flatten(),
+```
+- **`Flatten`**: Mengubah output dari matriks 2D menjadi vektor 1D untuk input ke layer fully connected.
+
+```python
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
+```
+- **`Dense`**: Layer fully connected dengan 128 neuron.
+- **`Dropout`**: Mengurangi overfitting dengan menonaktifkan 50% neuron secara acak selama pelatihan.
+
+```python
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+```
+- **Layer Output**: Menghasilkan probabilitas untuk 10 kelas menggunakan fungsi aktivasi **softmax**.
+
+```python
+model.summary()
+```
+- Menampilkan ringkasan struktur model, termasuk jumlah parameter yang dapat dilatih.
+
+ 
+
+### **3. Kompilasi dan Pelatihan Model**
+```python
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+```
+- **`adam`**: Optimizer adaptif yang populer untuk mempercepat pelatihan.
+- **`categorical_crossentropy`**: Fungsi loss untuk klasifikasi multi-kelas.
+- **`metrics=['accuracy']`**: Menggunakan akurasi sebagai metrik evaluasi.
+
+```python
+history = model.fit(train_images, train_labels, epochs=10, batch_size=64, validation_data=(test_images, test_labels))
+```
+- **Pelatihan Model**: Model dilatih dengan **10 epoch** menggunakan batch size 64, dengan data validasi dari data pengujian.
+
+ 
+
+### **4. Evaluasi Model**
+```python
+test_loss, test_acc = model.evaluate(test_images, test_labels)
+print('Test accuracy:', test_acc)
+```
+- **Evaluasi**: Mengukur akurasi model pada data pengujian.
+
+ 
+
+### **5. Demo Inferensi**
+```python
+from google.colab import files
+from keras.models import load_model
+from PIL import Image
+import numpy as np
+```
+- **`files.upload()`**: Fungsi untuk mengunggah file gambar.
+- **`load_model`**: Memuat model CNN yang telah disimpan.
+- **`PIL.Image`**: Digunakan untuk memuat dan memproses gambar.
+
+```python
+def load_and_prepare_image(file_path):
+    img = Image.open(file_path)
+    img = img.resize((32, 32))  # Sesuaikan dengan dimensi yang model Anda harapkan
+    img = np.array(img) / 255.0  # Normalisasi
+    img = np.expand_dims(img, axis=0)  # Tambahkan batch dimension
+    return img
+```
+- **Fungsi `load_and_prepare_image`**: Memuat gambar, mengubah ukuran ke \(32 \times 32\), melakukan normalisasi, dan menambahkan dimensi batch.
+
+```python
+for filename in uploaded.keys():
+    img = load_and_prepare_image(filename)
+    prediction = model.predict(img)
+    predicted_class_index = np.argmax(prediction, axis=1)[0]
+    predicted_class_name = class_names[predicted_class_index]
+    print(f'File: {filename}, Predicted Class Index: {predicted_class_index}, Predicted Class Name: {predicted_class_name}')
+```
+- **Inferensi**: Model membuat prediksi pada gambar yang diunggah, memberikan nama kelas dengan probabilitas tertinggi berdasarkan output softmax.
+
+ 
