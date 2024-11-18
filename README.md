@@ -399,4 +399,8 @@ for filename in uploaded.keys():
 ```
 - **Inferensi**: Model membuat prediksi pada gambar yang diunggah, memberikan nama kelas dengan probabilitas tertinggi berdasarkan output softmax.
 
- 
+ ### **Kesimpulan**  
+- Dataset CIFAR-10 diproses dengan normalisasi dan konversi label menjadi one-hot encoding untuk pelatihan model.  
+- Model CNN dibangun dengan beberapa **Convolutional Layer**, **Pooling Layer**, dan **Dense Layer** untuk klasifikasi 10 kelas.  
+- Model dilatih menggunakan TensorFlow dengan **optimizer Adam** dan **loss categorical_crossentropy** untuk mencapai akurasi optimal.  
+- Hasil model dievaluasi pada data pengujian, dan dapat digunakan untuk memprediksi gambar baru melalui proses inferensi.
